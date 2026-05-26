@@ -1,0 +1,221 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player_scene"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/zombie.tscn" id="2_zombie_scene"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="3_hud_scene"]
+[ext_resource type="Material" path="res://resources/materials/ground_material.tres" id="4_ground_mat"]
+[ext_resource type="Environment" path="res://resources/environments/world_environment.tres" id="5_world_env"]
+[ext_resource type="Script" path="res://scripts/systems/day_night_cycle.gd" id="6_day_night_script"]
+[ext_resource type="PackedScene" path="res://scenes/items/world_item.tscn" id="7_world_item_scene"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
+size = Vector2(100, 100)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(100, 0.2, 100)
+
+[sub_resource type="StandardMaterial3D" id="BuildingMaterial"]
+albedo_color = Color(0.32, 0.3, 0.28, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="WallMaterial"]
+albedo_color = Color(0.42, 0.32, 0.24, 1)
+roughness = 0.9
+
+; ==========================================
+; ROOT — Ana Dünya Düğümü
+; ==========================================
+
+[node name="World" type="Node3D"]
+
+; ==========================================
+; IŞIKLANDIRMA & ORTAM
+; ==========================================
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 20, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 60.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("5_world_env")
+
+[node name="DayNightCycle" type="Node" parent="."]
+script = ExtResource("6_day_night_script")
+
+; ==========================================
+; ZEMİN — Raycast hedefi (Layer 1 = Ground)
+; ==========================================
+
+[node name="Ground" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="GroundMesh" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("PlaneMesh_ground")
+material_override = ExtResource("4_ground_mat")
+
+[node name="GroundCollision" type="CollisionShape3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+shape = SubResource("BoxShape3D_ground")
+
+; ==========================================
+; YAPILAR — Placeholder binalar ve duvarlar
+; GDD Referans: Bölüm 3.1 — 3D Nesneler (3D Boxes / Meshes)
+; GDD Referans: Bölüm 4.1 — Yapı Sağlık Sistemi
+; ==========================================
+
+[node name="Structures" type="Node3D" parent="."]
+
+; --- Binalar (Ghost Alley sokak düzeni) ---
+; Kuzeybatı binası
+[node name="Building_01" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2, -7)
+size = Vector3(8, 4, 6)
+use_collision = true
+collision_layer = 8
+collision_mask = 0
+material = SubResource("BuildingMaterial")
+
+; Kuzeydoğu binası
+[node name="Building_02" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2, -7)
+size = Vector3(6, 4, 6)
+use_collision = true
+collision_layer = 8
+collision_mask = 0
+material = SubResource("BuildingMaterial")
+
+; Güneybatı binası
+[node name="Building_03" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2, 7)
+size = Vector3(6, 4, 8)
+use_collision = true
+collision_layer = 8
+collision_mask = 0
+material = SubResource("BuildingMaterial")
+
+; Güneydoğu binası
+[node name="Building_04" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 8)
+size = Vector3(8, 4, 6)
+use_collision = true
+collision_layer = 8
+collision_mask = 0
+material = SubResource("BuildingMaterial")
+
+; --- Sınır Duvarları ---
+; Kuzey duvarı
+[node name="Wall_North" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -14)
+size = Vector3(32, 3, 0.4)
+use_collision = true
+collision_layer = 8
+collision_mask = 0
+material = SubResource("WallMaterial")
+
+; Güney duvarı (açıklıklı — giriş noktası)
+[node name="Wall_South_Left" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 1.5, 14)
+size = Vector3(12, 3, 0.4)
+use_collision = true
+collision_layer = 8
+collision_mask = 0
+material = SubResource("WallMaterial")
+
+[node name="Wall_South_Right" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.5, 14)
+size = Vector3(12, 3, 0.4)
+use_collision = true
+collision_layer = 8
+collision_mask = 0
+material = SubResource("WallMaterial")
+
+; Batı duvarı
+[node name="Wall_West" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 1.5, 0)
+size = Vector3(0.4, 3, 28)
+use_collision = true
+collision_layer = 8
+collision_mask = 0
+material = SubResource("WallMaterial")
+
+; Doğu duvarı
+[node name="Wall_East" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 1.5, 0)
+size = Vector3(0.4, 3, 28)
+use_collision = true
+collision_layer = 8
+collision_mask = 0
+material = SubResource("WallMaterial")
+
+; ==========================================
+; OYUNCU
+; ==========================================
+
+[node name="Player" parent="." instance=ExtResource("1_player_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+; ==========================================
+; DÜŞMANLAR — Standart Zombiler
+; GDD Referans: Bölüm 5.1 — 🧟 Zombi (Standart)
+; ==========================================
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Zombie_01" parent="Enemies" instance=ExtResource("2_zombie_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -3)
+
+[node name="Zombie_02" parent="Enemies" instance=ExtResource("2_zombie_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 9)
+
+[node name="Zombie_03" parent="Enemies" instance=ExtResource("2_zombie_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 5)
+
+; ==========================================
+; YERDEKİ EŞYALAR (COLLECTIBLES)
+; ==========================================
+
+[node name="Items" type="Node3D" parent="."]
+
+[node name="Wood_01" parent="Items" instance=ExtResource("7_world_item_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -2)
+item_id = "tahta"
+quantity = 5
+
+[node name="Wood_02" parent="Items" instance=ExtResource("7_world_item_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 4)
+item_id = "tahta"
+quantity = 3
+
+[node name="Fabric_01" parent="Items" instance=ExtResource("7_world_item_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 3)
+item_id = "kumas"
+quantity = 4
+
+[node name="Metal_01" parent="Items" instance=ExtResource("7_world_item_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -5)
+item_id = "metal"
+quantity = 2
+
+[node name="Food_01" parent="Items" instance=ExtResource("7_world_item_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -1)
+item_id = "konserve"
+quantity = 2
+
+[node name="Water_01" parent="Items" instance=ExtResource("7_world_item_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -4)
+item_id = "su"
+quantity = 1
+
+[node name="Antibiotic_01" parent="Items" instance=ExtResource("7_world_item_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+item_id = "antibiyotik"
+quantity = 1
+
+; ==========================================
+; HUD
+; ==========================================
+
+[node name="HUD" parent="." instance=ExtResource("3_hud_scene")]
+
