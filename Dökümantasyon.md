@@ -8,12 +8,12 @@
 |---|---|
 | Oyun Adı / Title | Ghost Alley |
 | Tür / Genre | Top-Down 3D Survival RPG |
-| Motor / Engine | Unity 6 (3D Engine) |
+| Motor / Engine | Godot 4 (3D Engine) |
 | Platform | Windows (PC) |
 | Grafik Stili | Top-Down 3D / Orthographic 3D (2.5D derinlik hissi - Last Day on Earth / Project Zomboid stili) |
 | Hedef Kitle | Tek oyunculu, 16+ yaş |
 | Durum / Status | Pre-Production |
-| Geliştirici | Solo Developer |
+| Geliştirici | Solo Developer + AI Assisted |
 
 ---
 
@@ -306,36 +306,19 @@ Yeterli bölge temizlenip şehir merkezine ulaşıldığında kıyametin sırrı
 
 | İhtiyaç | Araç / Tool | Maliyet |
 |---|---|---|
-| Oyun Motoru | Unity 6 (Personal License) | Ücretsiz |
-| IDE / Kod Editörü | Visual Studio / Cursor | Ücretsiz |
-| Kod Desteği | Claude / ChatGPT | Ücretsiz |
-| Grafikler | OpenGameArt.org / Itch.io / AI Üretimi | Ücretsiz |
+| Oyun Motoru | Godot 4 | Ücretsiz |
+| Grafikler | OpenGameArt.org / Itch.io | Ücretsiz |
 | Ses Efektleri | Freesound.org / Mixkit | Ücretsiz |
 | Müzik | Incompetech.com | Ücretsiz |
+| Kod Desteği | AI (Claude vb.) | Ücretsiz |
 | Versiyon Kontrolü | GitHub | Ücretsiz |
-
-> **Not:** Unity 6 Personal License yıllık 100.000$ gelirin altındaki projeler için tamamen ücretsizdir. Gelir bu eşiği geçerse lisans gerekir.
-
-### 10.2 Unity 6 Teknik Altyapı / Unity 6 Technical Stack
-
-| Sistem | Unity Karşılığı |
-|---|---|
-| Karakter Fizik | `CharacterController` veya `Rigidbody` (3D) |
-| Mouse Hareket | `Raycast` → `NavMesh Agent` |
-| Kamera | `Camera` — Orthographic, 45° açı |
-| Düşman AI | `NavMesh` + `NavMesh Agent` |
-| Yapı Sistemi | `GameObject` (BoxCollider + MeshRenderer) |
-| Ses Sistemi | `AudioSource` + `AudioListener` |
-| UI | `Unity UI (uGUI)` veya `UI Toolkit` |
-| Kaydetme | `PlayerPrefs` veya `JSON Serialization` |
-| Işıklandırma | `URP (Universal Render Pipeline)` |
 
 ### 10.2 Mekanik Kararları / Final Mechanics Decisions
 
 #### 🎮 Kontrol & Kamera
-- **Hareket:** Unity `Raycast` + `NavMesh Agent` tabanlı Mouse tıkla-git sistemi (Vector3 fizik tabanlı)
-- **Kamera:** Unity `Camera` — Orthographic mod, 45° çapraz açılı takip (2.5D derinlik hissi)
-- **Grid Sistemi:** 3D Fizik tabanlı (Grid-snapped 3D Placement, Unity `GridLayout` ile)
+- **Hareket:** 3D Raycast tabanlı Mouse tıkla-git sistemi (Vector3 fizik tabanlı, CharacterBody3D)
+- **Kamera:** Orthographic 3D Kamera (çapraz açılı takip - 45° isometrik görüş, 2.5D derinlik hissi)
+- **Grid Sistemi:** 3D Fizik tabanlı (Grid-snapped 3D Placement, VoxelGrid sistem)
 
 #### 🎒 Envanter Sistemi
 - **Tür:** Konteynır sistemi (çanta, sırt çantası vb.)
@@ -379,11 +362,11 @@ Yeterli bölge temizlenip şehir merkezine ulaşıldığında kıyametin sırrı
 
 | Faz | İçerik | Hedef Süre |
 |---|---|---|
-| Faz 1 — Prototip | Unity 6 kurulum, 3D Harita, NavMesh+Raycast hareket altyapısı, Orthographic Kamera, ilk düşman | 2–3 hafta |
-| Faz 2 — Core Loop | Gece/gündüz, crafting, inventory, ölüm sistemi | 4–6 hafta |
+| Faz 1 — Prototip | 3D Harita ve Raycast Hareket Altyapısı, Orthographic Kamera, ilk düşman | 2–3 hafta |
+| Faz 2 — Core Loop | Gece/gündüz, crafting, inventory, ölüm | 4–6 hafta |
 | Faz 3 — Sistemler | NPC, bilgi, bölge ele geçirme, 3D yapı HP sistemi | 6–8 hafta |
 | Faz 4 — İçerik | Tüm düşmanlar, horde, hava durumu, hikaye | 8–10 hafta |
-| Faz 5 — Cila | Ses, müzik, UI (uGUI), denge, test, build | 4–6 hafta |
+| Faz 5 — Cila | Ses, müzik, UI, denge, test | 4–6 hafta |
 
 ---
 
@@ -403,5 +386,4 @@ Yeterli bölge temizlenip şehir merkezine ulaşıldığında kıyametin sırrı
 *Bu belge yaşayan bir dokümandır. Geliştirme sürecinde güncellenecektir.*
 *This is a living document and will be updated throughout development.*
 
-**GHOST ALLEY — GDD v1.1 © 2025**
-> v1.1 — Motor Unity 6'ya geçirildi. Teknik altyapı C# / NavMesh / URP olarak güncellendi.
+**GHOST ALLEY — GDD v1.0 © 2025**

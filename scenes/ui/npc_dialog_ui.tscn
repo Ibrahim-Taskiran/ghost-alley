@@ -1,0 +1,110 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/npc_dialog_ui.gd" id="1_dialog_ui_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
+bg_color = Color(0.08, 0.09, 0.11, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.2, 0.24, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_left = 12
+corner_radius_bottom_right = 12
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 12
+
+[node name="NPCDialogUI" type="Control" groups=["NPCDialogUI"]]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -130.0
+offset_right = 220.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dialog_ui_script")
+
+[node name="BackgroundPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_window")
+
+[node name="Margin" type="MarginContainer" parent="BackgroundPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 18
+
+[node name="VBox" type="VBoxContainer" parent="BackgroundPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="BackgroundPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.8, 0.6, 1)
+theme_override_font_sizes/font_size = 18
+text = "Hayatta Kalan Bulundu"
+horizontal_alignment = 1
+
+[node name="Description" type="Label" parent="BackgroundPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 12
+text = "Yerde acı içinde kıvranan bir kazazede var. Kanamasını durdurmak için 1 adet Bandaj gerekiyor."
+autowrap_mode = 2
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="BackgroundPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="FirstStageBox" type="HBoxContainer" parent="BackgroundPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/horizontal_separation = 15
+alignment = 1
+
+[node name="HelpButton" type="Button" parent="BackgroundPanel/Margin/VBox/FirstStageBox"]
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Yardım Et (1 Bandaj)"
+
+[node name="IgnoreButton" type="Button" parent="BackgroundPanel/Margin/VBox/FirstStageBox"]
+custom_minimum_size = Vector2(120, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Geç Git"
+
+[node name="SecondStageBox" type="HBoxContainer" parent="BackgroundPanel/Margin/VBox"]
+visible = false
+layout_mode = 2
+theme_override_constants/horizontal_separation = 15
+alignment = 1
+
+[node name="RecruitButton" type="Button" parent="BackgroundPanel/Margin/VBox/SecondStageBox"]
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Base'e Davet Et"
+
+[node name="FreeButton" type="Button" parent="BackgroundPanel/Margin/VBox/SecondStageBox"]
+custom_minimum_size = Vector2(120, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Serbest Bırak"
+
+[connection signal="pressed" from="BackgroundPanel/Margin/VBox/FirstStageBox/HelpButton" to="." method="_on_help_pressed"]
+[connection signal="pressed" from="BackgroundPanel/Margin/VBox/FirstStageBox/IgnoreButton" to="." method="_on_ignore_pressed"]
+[connection signal="pressed" from="BackgroundPanel/Margin/VBox/SecondStageBox/RecruitButton" to="." method="_on_recruit_pressed"]
+[connection signal="pressed" from="BackgroundPanel/Margin/VBox/SecondStageBox/FreeButton" to="." method="_on_free_pressed"]

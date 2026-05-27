@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/bed_item.gd" id="1_bed_script"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bed"]
+albedo_color = Color(0.2, 0.4, 0.75, 1)
+roughness = 0.7
+
+[sub_resource type="BoxMesh" id="BoxMesh_bed"]
+material = SubResource("StandardMaterial3D_bed")
+size = Vector3(1.2, 0.4, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pickup"]
+size = Vector3(2.5, 1.8, 3)
+
+[node name="BedItem" type="Area3D"]
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("1_bed_script")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+mesh = SubResource("BoxMesh_bed")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("BoxShape3D_pickup")
