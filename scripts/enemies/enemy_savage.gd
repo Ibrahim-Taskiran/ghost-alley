@@ -69,7 +69,7 @@ func _perform_ranged_attack() -> void:
 	_attack_timer = attack_cooldown
 	
 	# Görüş hattını doğrula (engeller arkasından ateş edemez)
-	if not _has_line_of_sight_to_player():
+	if not _has_line_of_sight_to(_player):
 		return
 		
 	# Oyuncuya hasar ver

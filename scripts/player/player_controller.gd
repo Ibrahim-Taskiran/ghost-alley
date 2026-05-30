@@ -56,13 +56,18 @@ func _ready() -> void:
 	_target_position = global_position
 	health_changed.emit(health, max_health)
 	
-	# Envanteri başlat
-	inventory = Inventory.new(6)
+	# Envanteri başlat (Yeni üs yapma malzemelerinin sığması için 16 slot yapıldı)
+	inventory = Inventory.new(21)
 	inventory.add_item("kitap_tip", 1)
 	inventory.add_item("kitap_insaat", 1)
 	inventory.add_item("tabanca", 1)
-	inventory.add_item("tahta", 10)
-	inventory.add_item("metal", 10)
+	inventory.add_item("tahta", 15)
+	inventory.add_item("metal", 15)
+	inventory.add_item("siginak_bayragi", 1)
+	inventory.add_item("duvar_ahsap", 6)
+	inventory.add_item("kapi_ahsap", 1)
+	inventory.add_item("jenerator", 1)
+	inventory.add_item("taret", 1)
 	inventory.add_item("konserve", 2)
 	inventory.add_item("su", 2)
 	
@@ -412,9 +417,12 @@ func _interact_with_nearby() -> void:
 				get_node("XPSystem").gain_xp(5)
 		else:
 			show_notification("Envanter dolu!", Color(0.9, 0.3, 0.3))
-	# 4. Eğer yapı en yakınsa onu tamir et
+	# 4. Eğer yapı en yakınsa ve kapıysa aç/kapat, yoksa tamir et
 	elif closest_struct:
-		closest_struct.repair(self)
+		if closest_struct.has_method("toggle_door"):
+			closest_struct.call("toggle_door", self)
+		else:
+			closest_struct.repair(self)
 
 
 func drop_item_in_world(item_id: String, qty: int) -> void:
@@ -439,8 +447,8 @@ func equip_weapon(item_id: String, damage: float) -> void:
 	weapon_damage = damage
 	
 	# Eğer 1. slot boş ise otomatik oraya yerleşsin
-	if hotbar[0] == "":
-		hotbar[0] = item_id
+	if inventory.slots[16]["item_id"] == "":
+		inventory.slots[16] = {"item_id": item_id, "quantity": 1}
 		var hud = get_tree().get_first_node_in_group("HUD")
 		if hud and hud.has_method("update_hotbar_ui"):
 			hud.call("update_hotbar_ui")
@@ -595,21 +603,24 @@ func _deconstruct_nearby_structure() -> void:
 			closest_struct.call("deconstruct", self)
 
 # === HOTBAR (HIZLI ERİŞİM BARISSLOTLARI) YÖNETİMİ ===
-var hotbar: Array[String] = ["", "", "", "", ""]
+var hotbar: Array[String]:
+	get:
+		var arr: Array[String] = ["", "", "", "", ""]
+		for i in range(5):
+			arr[i] = inventory.slots[16 + i]["item_id"]
+		return arr
+	set(value):
+		pass
 
 func _use_hotbar_slot(index: int) -> void:
-	if index < 0 or index >= hotbar.size():
+	if index < 0 or index >= 5:
 		return
 		
-	var item_id = hotbar[index]
+	var pocket_slot = inventory.slots[16 + index]
+	var item_id = pocket_slot["item_id"]
+	var quantity = pocket_slot["quantity"]
 	if item_id == "":
-		show_notification("Slot boş! Envanterden [Sağ Tık -> Kısayola Ata] ile eşya atayın.", Color(0.8, 0.8, 0.8))
-		return
-		
-	# Envanterde bu eşyadan en az 1 adet var mı kontrol et
-	if not inventory.has_item(item_id, 1):
-		var item_name = ItemDatabase.get_item(item_id).get("name", "Eşya")
-		show_notification("Envanterde %s kalmadı!" % item_name, Color(0.9, 0.3, 0.3))
+		show_notification("Cep boş! Sırt çantasından sürükleyip buraya yerleştirin.", Color(0.8, 0.8, 0.8))
 		return
 		
 	var item = ItemDatabase.get_item(item_id)
@@ -622,6 +633,10 @@ func _use_hotbar_slot(index: int) -> void:
 	elif item_id == "metal" and has_node("BuildManager"):
 		var build_mgr = get_node("BuildManager")
 		build_mgr.call("start_building", "metal_barricade")
+		return
+	elif item.get("effects", {}).has("structure_id") and has_node("BuildManager"):
+		var build_mgr = get_node("BuildManager")
+		build_mgr.call("start_building", item["effects"]["structure_id"])
 		return
 		
 	# Silah kuşanma kontrolü
@@ -636,19 +651,12 @@ func _use_hotbar_slot(index: int) -> void:
 			hud.call("update_hotbar_ui")
 		return
 		
-	# Diğer tüketilebilirler (Yemek, Su, İlaç, Kitap) - Envanterdeki ilk eşleşen slotta "Kullan" tetikleme
-	var slot_idx = -1
-	for i in range(inventory.max_slots):
-		if inventory.slots[i]["item_id"] == item_id:
-			slot_idx = i
-			break
-			
-	if slot_idx != -1:
-		var inv_ui = get_tree().get_first_node_in_group("InventoryUI") as InventoryUI
-		if inv_ui:
-			inv_ui.call("_use_item_at", slot_idx)
-			
-			# HUD Hotbar UI güncelle
-			var hud = get_tree().get_first_node_in_group("HUD")
-			if hud and hud.has_method("update_hotbar_ui"):
-				hud.call("update_hotbar_ui")
+	# Diğer tüketilebilirler (Yemek, Su, İlaç, Kitap) - Envanterdeki ilgili cep slotunda "Kullan" tetikleme
+	var inv_ui = get_tree().get_first_node_in_group("InventoryUI") as InventoryUI
+	if inv_ui:
+		inv_ui.call("_use_item_at", 16 + index)
+		
+		# HUD Hotbar UI güncelle
+		var hud = get_tree().get_first_node_in_group("HUD")
+		if hud and hud.has_method("update_hotbar_ui"):
+			hud.call("update_hotbar_ui")

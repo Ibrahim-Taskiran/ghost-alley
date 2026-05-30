@@ -81,12 +81,12 @@ func respawn_resources() -> void:
 
 func _get_random_item_for_danger(danger: int) -> String:
 	# Tehlike seviyesine göre loot tablosu
-	var pool = ["tahta", "kumas", "konserve", "su"] # Seviye 1 (Low)
+	var pool = ["tahta", "kumas", "konserve", "su", "plastik"] # Seviye 1 (Low)
 	
 	if danger >= 2:
-		pool.append_array(["metal", "bandaj", "fener", "sopa"]) # Seviye 2 (Medium)
+		pool.append_array(["metal", "bandaj", "fener", "sopa", "yakit", "barut_kovan"]) # Seviye 2 (Medium)
 	if danger >= 3:
-		pool.append_array(["metal", "antibiyotik", "bicak"]) # Seviye 3 (High)
+		pool.append_array(["metal", "antibiyotik", "bicak", "elektronik", "kimyasal"]) # Seviye 3 (High)
 	if danger >= 4:
 		pool.append_array(["tabanca", "kitap_tip", "kitap_insaat"]) # Seviye 4 (Critical)
 		
@@ -97,6 +97,11 @@ func _get_default_qty(item_id: String) -> int:
 		"tahta": return randi_range(3, 5)
 		"kumas": return randi_range(2, 4)
 		"metal": return randi_range(1, 3)
+		"plastik": return randi_range(2, 4)
+		"yakit": return 1
+		"barut_kovan": return randi_range(2, 5)
+		"elektronik": return randi_range(1, 2)
+		"kimyasal": return randi_range(1, 2)
 		"konserve": return randi_range(1, 2)
 		"su": return randi_range(1, 2)
 		"bandaj": return 1

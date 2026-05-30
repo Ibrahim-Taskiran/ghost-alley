@@ -49,19 +49,19 @@ func _check_zone_status() -> void:
 			if players.size() > 0:
 				players[0].show_notification("🎉 Sektör Temizlendi: %s! Yatak kurarak burayı Güvenli Bölge yapın." % zone_name, Color(0.3, 0.8, 0.9))
 				
-		# Check if a bed exists inside this zone to declare it Safe!
+		# Check if a bed or shelter flag exists inside this zone to declare it Safe!
 		var beds = get_overlapping_areas()
-		var has_bed = false
+		var has_safe_object = false
 		for area in beds:
-			if area.is_in_group("Beds"):
-				has_bed = true
+			if area.is_in_group("Beds") or area.get_parent().is_in_group("ShelterFlags"):
+				has_safe_object = true
 				break
 				
-		if has_bed and not is_safe:
+		if has_safe_object and not is_safe:
 			is_safe = true
 			var players = get_tree().get_nodes_in_group("Player")
 			if players.size() > 0:
-				players[0].show_notification("🏡 GÜVENLİ BÖLGE AKTİF: %s! Artık burada güvenle uyuyabilirsiniz." % zone_name, Color(0.3, 0.8, 0.3))
+				players[0].show_notification("🏡 SIĞINAK AKTİF: %s Güvenli Bölge yapıldı! Düşman spawni durduruldu." % zone_name, Color(0.3, 0.8, 0.3))
 				if zone_id == "merkez":
 					_trigger_story_ending(players[0])
 				

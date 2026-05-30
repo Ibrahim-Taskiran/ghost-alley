@@ -89,54 +89,66 @@ Kıyametten önce şehrin sokaklarında yaşayan, geçmişi belirsiz bir evsiz. 
 
 ### 3.1 Harita Yapısı / Map Structure
 
-Top-down 3D perspektif (Orthographic kamera, 45° çapraz açılı). Harita, mahalleler halinde organize edilmiş geniş bir kıyamet sonrası şehirden oluşur. Tüm duvar, çit ve barikatlar **3D Nesneler (3D Boxes / Meshes)** olarak kurgulenmişlerdir. Başlangıçta tamamı fog of war ile kaplıdır; oyuncu keşfettikçe açılır.
+Top-down 3D perspektif (Orthographic kamera, 45° çapraz açılı). Harita, mahalleler halinde organize edilmiş, pre-production aşamasında **500x500 birimlik devasa bir alana (5x Ölçek)** genişletilmiş geniş bir kıyamet sonrası şehirden oluşur. Zemin collidarları ve sınır meshleri bu ölçekle tamamen uyumludur. Başlangıçta tamamı fog of war ile kaplıdır; oyuncu keşfettikçe açılır. Harita üzerinde canlı HUD miniharita (Sağ Alt) ve `M` tuşu ile açılan tam ekran Taktik Harita mevcuttur.
 
 ### 3.2 Mahalle Tehlike Seviyeleri / District Danger Levels
 
-| Bölge / Zone | Tehlike | Özellik / Feature |
-|---|---|---|
-| Dış Mahalleler | ⭐ Düşük | Başlangıç bölgesi, temel kaynaklar |
-| Ticaret Bölgesi | ⭐⭐ Orta | Dükkanlar, daha iyi loot, vahşi insan grupları |
-| Sanayi Bölgesi | ⭐⭐⭐ Yüksek | Askeri sandıklar, fabrika binaları, güçlü düşmanlar |
-| Şehir Merkezi | ⭐⭐⭐⭐ Kritik | Son boss, kıyametin sırrı, hikaye sonu |
+| Bölge / Zone | Tehlike Seviyesi | Koordinat Sınırları | Özellik / Feature |
+|---|---|---|---|
+| Dış Mahalleler | ⭐ Düşük (Low) | X/Z: -250 ila -120 | Başlangıç bölgesi, temel kaynaklar |
+| Ticaret Bölgesi | ⭐⭐ Orta (Medium) | X/Z: -120 ila 10 | Dükkanlar, daha iyi loot, vahşi insan grupları |
+| Sanayi Bölgesi | ⭐⭐⭐ Yüksek (High) | X/Z: 10 ila 130 | Zehirli variller, askeri sandıklar, taret parçaları |
+| Şehir Merkezi | ⭐⭐⭐⭐ Kritik (Deadly) | X/Z: 130 ila 250 | Son boss, kıyametin sırrı, hikaye sonu |
 
-### 3.3 Bölge Ele Geçirme / Zone Capture
+### 3.3 Bölge Ele Geçirme & Sığınak Bayrağı / Zone Capture & Shelter Flag
 
 | Adım | Aksiyon | Sonuç |
 |---|---|---|
-| 1 | Sokağı düşmanlardan temizle | Düşman spawni durur |
-| 2 | Harap binaları tamir et *(3D Meshes)* | Bina kullanılabilir hale gelir |
-| 3 | Çit / barikat / kapı kur *(3D Nesneler)* | Bölge savunmaya hazır |
-| 4 | Bölge "Güvenli" ilan edilir | Tüm bonuslar aktif olur |
+| 1 | Sokağı veya binayı düşmanlardan temizle | Düşman spawni durdurulmaya hazır hale gelir |
+| 2 | Bir sektöre **Sığınak Bayrağı** (`siginak_bayragi.tscn`) yerleştir | Sistem bölgeyi anında **Güvenli Bölge (Safezone)** ilan eder |
+| 3 | Bölgeye Çit / Duvar / Kapı kur *(1.0 Grid Snapping)* | Zombi spawn'ları bu alanda kalıcı olarak son bulur |
+| 4 | Kaynak Yenilenmesi tetiklenir | Güvenli bölgede her 2 saatte bir hammadde üretimi başlar |
 
 **Güvenli Bölge Avantajları:**
-- Güvenli uyku → tam HP ile güne başlama
-- Pasif kaynak yenilenmesi
 - NPC'lerin bölgeye yerleşmesi
 - Horde dalgalarına karşı savunma hattı
 
 ---
 
-## 4. Bina & Yapı Sistemi / Building System
+## 4. Bina & Yapı Sistemi / Building & Defensive Systems
 
 ### 4.1 Yapı Sağlık Sistemi / Structure HP System
 
-Her duvar, çit, barikat ve binanın kendine ait HP değeri vardır. Tüm yapılar **3D Nesneler (3D Boxes / Meshes)** olarak dünyaya yerleştirilir. Hasar aldıkça görsel olarak çatlar ve kırılır. HP sıfırlanırsa yapı yıkılır ve bölge artık güvenli sayılmaz.
+Tüm yapı elemanları, elektrikli cihazlar ve savunma taretleri **3D Nesneler (3D TSCN Prefabları)** olarak dünyaya yerleştirilir. İnşa modunda (`B` tuşu) veya envanterden doğrudan `1.0 birimlik` grid snapping ile yerleşirler. HP değeri sıfırlanırsa yapı yıkılır.
 
-| Yapı / Structure | HP | Tamir Malzemesi | 3D Tipi |
+| Yapı / Structure | HP | İnşa Bedeli / Cost | Özellik / Feature |
 |---|---|---|---|
-| Ahşap Çit *(3D Box)* | 100 | Tahta × 5 | BoxMesh |
-| Metal Barikat *(3D Box)* | 300 | Metal × 8 + Alet | BoxMesh |
-| Kapı (Ahşap) *(3D Mesh)* | 150 | Tahta × 10 + Menteşe | CustomMesh |
-| Kapı (Metal) *(3D Mesh)* | 400 | Metal × 15 + Kilit | CustomMesh |
-| Harap Bina Duvarı *(3D Box)* | 200 | Tahta × 20 veya Metal × 10 | BoxMesh |
-| Tamir Edilmiş Bina *(3D Box)* | 500 | Tahta × 50 + Metal × 20 | BoxMesh |
+| **Ahşap Duvar** *(duvar_ahsap.tscn)* | 150 | Tahta × 6 | Temel savunma hattı |
+| **Metal Duvar** *(duvar_metal.tscn)* | 400 | Metal Parçası × 8 | Güçlü barikat hattı |
+| **Ahşap Kapı** *(kapi_ahsap.tscn)* | 150 | Tahta × 10 | Açılıp kapanabilir geçit |
+| **Metal Kapı** *(kapi_metal.tscn)* | 400 | Metal Parçası × 10 | Güvenli, zırhlı kapı |
+| **Zemin** *(zemin.tscn)* | 200 | Tahta × 4 | Sığınak temeli |
+| **Çatı** *(cati.tscn)* | 200 | Tahta × 4 | Y-ekseni `2.5m` yüksekliğe otomatik oturan çatı |
+| **Sığınak Bayrağı** *(siginak_bayragi.tscn)* | 100 | Tahta × 15 + Plastik × 5 | Güvenli bölge tetikleyicisi |
+| **Jeneratör** *(jenerator.tscn)* | 250 | Demir × 15 + Yakıt × 5 | Üs elektrik santrali |
+| **Projektör** *(projektor.tscn)* | 150 | Elektronik × 4 + Metal × 5 | Gece görüş/aydınlatma |
+| **Otomatik Taret** *(taret.tscn)* | 350 | Silah + Metal × 10 + Elektronik | 3D döner başlıklı otomatik savunma hattı |
 
-> **Not:** Mühendislik stat'ı her seviyede tamir hızını %15 artırır ve yapı max HP'sine +50 bonus ekler.
+### 4.2 🚪 Gelişmiş Kapı Etkileşimi (Interactive Doors)
+Kapıların yanına gelindiğinde **`E`** tuşu ile kapı açılabilir veya kapatılabilir.
+- **Açık Kapı:** Çarpışma kutuları devre dışı kalır, oyuncular ve düşmanlar geçebilir.
+- **Kapalı Kapı:** Tam bir barikat görevi üstlenir.
+- **Tamir Etme:** Hasar gören kapıları tamir etmek için yanına gelip **`Shift + E`** tuşlarına basılır.
 
-### 4.2 Gece Yapı Saldırıları / Night Structure Attacks
+### 4.3 🤖 Otomatik Savunma Tareti AI (Automatic Defensive Turret)
+Oyuncu üssüne bir otomatik taret yerleştirdiğinde:
+- `12 metre` yarıçapındaki en yakın canlı zombiyi otomatik olarak hedefler.
+- 3D kafasını zombiye doğru çevirerek her `0.8 saniyede` bir **`18 HP`** hasar veren mermiler ateşler.
+- Ateş ettikçe silah sesi yayar ve çevredeki zombileri üstüne çeker.
 
-Geceleri düşmanlar öncelikle 3D çitlere ve duvarlara saldırır. Oyuncunun gece rutininin bir parçası zayıf noktaları tespit edip güçlendirmek olmalıdır. 3D yapılar hasar aldıkça mesh deformasyonu ile görsel olarak kırılır.
+### 4.4 ⚠️ Zehirli Atık Varilleri & Engeller (Environmental Hazards)
+- **Zehirli Variller (Toxic Barrels):** Sanayi bölgesindeki parıldayan yeşil variller `3.5m` yarıçaptaki oyunculara saniyede **`12 HP`** radyasyon hasarı verir (enfeksiyonu tetikler).
+- **Yol Blokajları:** Paslı araba barikatları (`RustyCar`) ve tilted beton köprüler (`Bridge`) keşif ve taktik rotaları belirler.
 
 ---
 
@@ -320,42 +332,40 @@ Yeterli bölge temizlenip şehir merkezine ulaşıldığında kıyametin sırrı
 - **Kamera:** Orthographic 3D Kamera (çapraz açılı takip - 45° isometrik görüş, 2.5D derinlik hissi)
 - **Grid Sistemi:** 3D Fizik tabanlı (Grid-snapped 3D Placement, VoxelGrid sistem)
 
-#### 🎒 Envanter Sistemi
-- **Tür:** Konteynır sistemi (çanta, sırt çantası vb.)
-- **Kapasite:** Sınırlı (her konteynırın max kapasitesi var)
+#### 🎒 Envanter Sistemi (Backpack & Pockets)
+- **Tür:** İki katmanlı entegre konteynır sistemi (Sırt Çantası ve Cepler).
+- **Kapasite:** 21 Slot (16 Sırt Çantası slotu + 5 Hızlı Erişim Cebi slotu).
+- **Sürükle-Bırak:** Çanta ile cepler arasında iki yönlü fiziksel transfer (swap/takas) desteği. Mükerrer kısayol atamaları tamamen engellenmiştir, eşya fiziksel olarak çantadan cebe veya cepten çantaya taşınır.
+- **Tüketim:** Eşyalar doğrudan ceplerden (slots 16-20) tüketilebilir (1-5 tuşları). Üretim ve inşaat sistemleri öncelikli olarak ceplerdeki hammaddeleri tüketir.
 
 #### 🌍 Kaynak Yönetimi
-- **Güvenli Bölge:** Kaynaklar yenilenmiyor
-- **Tehlikeli Bölge:** Her 7 günde bir loot/sandık yenilenir
-- **Bina/Üs Boyutu:** Orta (2x2 ila 4x4 grid)
+- **Yenilenme:** Güvenli bölgeler hariç, tehlikeli bölgelerdeki loot ve sandıklar 7 günde bir yenilenir.
+- **Bina/Üs Boyutu:** 500x500 harita sınırlarında modüler ve serbest inşaat alanı (1.0 Grid Snapping).
 
 #### 🌙 Gün-Gece Döngüsü
 - **Gündüz:** 17 dakika
 - **Gece:** 7 dakika
-- **Düşman Sistemi:** Gündüz sabit, gece rastgele kombinasyon
+- **Düşman Sistemi:** Gündüz sabit, gece rastgele kombinasyon ve horde saldırıları.
 
 #### 💀 Ölüm Sistemi
-- Ölünce güvenli bölgedeki yatağında doğ (veya oyunun başladığı noktada)
-- Eşyalar: Öldüğün yerde kalır
-- Miniharita: Eşya konumu işaretli kalır
-- Ayarlar: İleride bu sistem kişiselleştirilebilir
+- Ölünce güvenli bölgedeki en son dikilen Sığınak Bayrağı'nda respawn ol (veya başlangıç noktasında).
+- Eşyalar: Öldüğün yerde physical loot kutusu olarak kalır.
 
-#### 🧟 Horde Sistemi
-- **Frekans:** Her 14 günde bir
-- **Max Düşman:** Dinamik (bilgisayar gücüne göre)
-- **Horde Öncesi:** Oyuncu uyarılır
+#### 🗺️ Harita Arayüzü (Minimap & Fullmap)
+- **Canlı Miniharita:** HUD ekranının Sağ Alt köşesine konumlandırılmıştır. Oyuncuyu ortalayan ortografik bir 3D kameradan oluşur. Oyuncunun baktığı yönü kırmızı bir ok ile gösterir. Window yeniden boyutlandırıldığında sağ alta kilitlenir.
+- **Taktik Harita (Tam Ekran - M Tuşu):** Oyuncu M tuşuna bastığında açılan 550x550 piksellik yarı şeffaf cyberpunk panel. Oyuncunun etrafındaki 200 metrelik alanı kuşbakışı render eder. Açıldığında karakter hareketini dondurur, envanter veya crafting açıkken çakışma koruması ile açılması engellenir.
 
 #### 🏗️ Yapı Sistemi
-- **Detay:** Orta seviye (HP, mühendislik bonusu, tamir timi)
-- **Savaş:** Anlık (tıkla ve savaş)
-- **3D Yapılar:** BoxMesh ve CustomMesh kullanarak 3D Nesneler olarak implement edilir
+- **Detay:** 3D modüler inşaat elemanları (duvar_ahsap, duvar_metal, kapi_ahsap, kapi_metal, zemin, cati, siginak_bayragi).
+- **Elektrik & Güç:** jenerator yerleştirildiğinde üs elektrik sistemi başlar, projektor ve taret çalıştırılabilir.
+- **Taret:** 12 metre range'deki en yakın zombiyi hedefleyen ve 0.8 saniyede bir 18 HP hasar veren otomatik taret yapısı.
 
 #### 🗺️ Harita
-- **Tür:** Sabit (el ile tasarlanmış şehir)
-- **Prosedürel:** Hayır
+- **Tür:** Genişletilmiş sabit 500x500 birimlik şehir haritası.
+- **Prosedürel:** Hayır.
 
 #### 🎵 Multiplayer
-- **v1.0:** Tek oyunculu
+- **v1.0:** Tek oyunculu (Modüler üs ve cepler altyapısı hazır)
 - **v2.0+:** Çok oyunculu (planlı)
 
 ### 10.3 Geliştirme Fazları / Development Phases

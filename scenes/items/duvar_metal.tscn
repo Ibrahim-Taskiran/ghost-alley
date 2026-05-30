@@ -1,0 +1,49 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/structure_base.gd" id="1_structure_script"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_metal"]
+albedo_color = Color(0.32, 0.35, 0.4, 1)
+roughness = 0.4
+metallic = 0.8
+emission_enabled = true
+emission = Color(0.1, 0.15, 0.25, 1)
+emission_energy_multiplier = 0.2
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall"]
+material = SubResource("StandardMaterial3D_metal")
+size = Vector3(2, 2.5, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_collision"]
+size = Vector3(2, 2.5, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
+size = Vector3(2.8, 3.0, 1.5)
+
+[node name="DuvarMetal" type="StaticBody3D"]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("1_structure_script")
+structure_name = "Metal Duvar"
+max_health = 400.0
+repair_material_id = "metal"
+repair_cost = 2
+repair_heal_amount = 80.0
+build_material_id = "duvar_metal"
+build_cost = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+mesh = SubResource("BoxMesh_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+shape = SubResource("BoxShape3D_wall_collision")
+
+[node name="InteractionArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+shape = SubResource("BoxShape3D_interaction")

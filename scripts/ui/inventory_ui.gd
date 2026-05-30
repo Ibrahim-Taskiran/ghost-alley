@@ -9,6 +9,7 @@ var _inventory: Inventory = null
 var _context_menu: PanelContainer = null
 
 func _ready() -> void:
+	add_to_group("InventoryUI")
 	# Hide by default
 	hide()
 	
@@ -59,26 +60,31 @@ func update_ui() -> void:
 	if not _inventory or not grid_container:
 		return
 		
-	# Update title
-	title_label.text = "Cepler (%d/%d Slot)" % [_inventory.get_total_items(), _inventory.max_slots]
+	# Calculate total filled slots in the backpack (slots 0 to 15)
+	var backpack_filled = 0
+	for i in range(16):
+		if _inventory.slots[i]["item_id"] != "":
+			backpack_filled += 1
+			
+	# Update title (Backpack only displays 16 slots)
+	title_label.text = "Sırt Çantası (%d/16 Slot)" % backpack_filled
 	
 	# Clear existing children
 	for child in grid_container.get_children():
 		child.queue_free()
 		
-	# Populate grid slots
-	for i in range(_inventory.max_slots):
+	# Populate grid slots (Only backpack slots 0 to 15)
+	for i in range(16):
 		var slot_data = _inventory.slots[i]
 		var item_id = slot_data["item_id"]
 		var quantity = slot_data["quantity"]
 		
 		# Slot Container panel
-		var slot_panel = PanelContainer.new()
-		slot_panel.set_script(load("res://scripts/ui/drag_drop_slot.gd"))
+		var slot_panel = preload("res://scripts/ui/drag_drop_slot.gd").new()
 		slot_panel.set("slot_index", i)
 		slot_panel.set("inventory_ui", self)
 		slot_panel.custom_minimum_size = Vector2(80, 80)
-		slot_panel.mouse_filter = Control.MOUSE_FILTER_PASS
+		slot_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		
 		# Premium style for slots
 		var style = StyleBoxFlat.new()
@@ -262,6 +268,16 @@ func _use_item_at(index: int) -> void:
 				close_inventory()
 			else:
 				used = false
+		else:
+			used = false
+			
+	# If structural item (has structure_id in effects)
+	if item.get("effects", {}).has("structure_id"):
+		if _player.has_node("BuildManager"):
+			var build_mgr = _player.get_node("BuildManager")
+			build_mgr.call("start_building", item["effects"]["structure_id"])
+			used = false # Do NOT consume now! It will be consumed on placement.
+			close_inventory()
 		else:
 			used = false
 		

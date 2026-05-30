@@ -33,6 +33,66 @@ var structures_db: Dictionary = {
 		"cost_material": "tahta",
 		"cost_qty": 3,
 		"scene_path": "res://scenes/items/bed_item.tscn"
+	},
+	"duvar_ahsap": {
+		"name": "Ahşap Duvar",
+		"cost_material": "duvar_ahsap",
+		"cost_qty": 1,
+		"scene_path": "res://scenes/items/duvar_ahsap.tscn"
+	},
+	"duvar_metal": {
+		"name": "Metal Duvar",
+		"cost_material": "duvar_metal",
+		"cost_qty": 1,
+		"scene_path": "res://scenes/items/duvar_metal.tscn"
+	},
+	"kapi_ahsap": {
+		"name": "Ahşap Kapı",
+		"cost_material": "kapi_ahsap",
+		"cost_qty": 1,
+		"scene_path": "res://scenes/items/kapi_ahsap.tscn"
+	},
+	"kapi_metal": {
+		"name": "Metal Kapı",
+		"cost_material": "kapi_metal",
+		"cost_qty": 1,
+		"scene_path": "res://scenes/items/kapi_metal.tscn"
+	},
+	"zemin": {
+		"name": "Zemin Döşemesi",
+		"cost_material": "zemin",
+		"cost_qty": 1,
+		"scene_path": "res://scenes/items/zemin.tscn"
+	},
+	"cati": {
+		"name": "Çatı Kaplaması",
+		"cost_material": "cati",
+		"cost_qty": 1,
+		"scene_path": "res://scenes/items/cati.tscn"
+	},
+	"siginak_bayragi": {
+		"name": "Sığınak Bayrağı",
+		"cost_material": "siginak_bayragi",
+		"cost_qty": 1,
+		"scene_path": "res://scenes/items/siginak_bayragi.tscn"
+	},
+	"jenerator": {
+		"name": "Jeneratör",
+		"cost_material": "jenerator",
+		"cost_qty": 1,
+		"scene_path": "res://scenes/items/jenerator.tscn"
+	},
+	"projektor": {
+		"name": "Projektör",
+		"cost_material": "projektor",
+		"cost_qty": 1,
+		"scene_path": "res://scenes/items/projektor.tscn"
+	},
+	"taret": {
+		"name": "Otomatik Taret",
+		"cost_material": "taret",
+		"cost_qty": 1,
+		"scene_path": "res://scenes/items/taret.tscn"
 	}
 }
 

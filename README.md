@@ -10,33 +10,34 @@
 
 ## 🌟 Key Features
 
-### 1. 🕒 Dynamic Day/Night Cycle
-* **Day (17m) / Night (7m)** time-progression engine.
-* Real-time celestial rotation, sun intensity fading, and sky color gradient transitions.
-* **Night Panic Buffs**: At nightfall (23:00 to 06:00), zombies automatically receive a **+50% Movement Speed** and **+30% Attack Damage** boost.
+### 1. 🎒 Backpack & Pockets Inventory (Two-way Swap)
+* **Backpack Layer (Slots 0-15)**: 16 basic storage slots in the main inventory overlay (**I key**).
+* **Pocket Layer (Slots 16-20 / Hotbar)**: 5 rapid-access slots represented as elegant `40x40` pixel squares at the bottom-left of the HUD.
+* **True Drag-and-Drop Transfer**: Moving items between the backpack and pockets physically transfers them (removing them from the previous slot). Swapping items automatically transfers the old item back to the backpack!
+* **Pocket Hotkey Consumption**: Items placed in pockets can be used/eaten directly by pressing hotkeys **`1` to `5`**.
 
-### 2. 🍖 Real-time Survival & Infection
-* **Vitality Meters**: Continuous depletion of **Hunger**, **Thirst**, and **Sleep** meters mapped to in-game time.
-* **Physical Penalties**: Starvation causes immediate movement speed reduction (-30%) and health damage. Dehydration causes rapid health deterioration.
-* **Zombie Infection**: Zombie attacks carry a **20% chance of infection**. If not treated with Antibiotics within **3 game days**, the infection becomes fatal.
+### 2. 🔨 Modular Base Building & Defenses
+* **Moduler Construction Grid (1.0 Snapping)**: Build walls, doors, floors, and roofs dynamically from pocket slots (**B key** or direct pocket placement).
+* **Interactive Doors**: Press **`E`** near doors to toggle open/close (disables collision dynamically), or **`Shift + E`** to repair them.
+* **Electricity & Savunma (Turrets)**: Place an electric **Generator** to power **Projectors** and **Automatic Turrets** (12m range, target-tracking head, deals 18 HP damage every 0.8s).
+* **Sığınak Bayrağı (Safezone)**: Place a Shelter Flag to declare a safe sector, stopping zombie respawns inside that zone forever.
 
-### 3. 🎒 Grid-based Inventory & Interactions
-* Slot-based container inventory featuring stack limits and weight calculations.
-* Dynamic **3D World Pickups** glowing with color-coded materials matching item types (Emerald for Food, Crimson for Meds, Purple for Weapons).
-* Proximity-based item gathering (**E key**) and drag/drop world item discarding (**Shift + Left Click**).
+### 3. 🗺️ Real-time Minimap & Tactical Map (M Key)
+* **HUD Minimap (Bottom-Right)**: Features a real-time top-down 3D orthogonal camera centering the player with a red direction pointer. Stays locked to the bottom-right on window resizing.
+* **Tactical Map (M Key)**: Press **`M`** to toggle a premium 550x550 tactical overlay showing a massive 200m area. Safely blocks player inputs during use with complete interface collision protection.
 
-### 4. 🔨 Engineering & Crafting
-* Two-panel crafting terminal (**Tab key**) showcasing recipe feasibility based on ingredient availability and character statistics.
-* **Level 1 Recipes**: Craft essential gear like Wood Clubs, Bandages, and Hunting Knives.
+### 4. ☣️ 5x Map Scale & Environmental Hazards
+* **500x500 Scale**: Extended coordinates rescaled to 500x500 units for four core sectors (Outskirts, Commercial, Industrial, City Center).
+* **Toxic Waste Barrels**: Glows bright neon green in industrial sectors, dealing **12 HP/s radiation damage** (triggering infection) in a 3.5m radius.
+* **Car Barricades & Bridges**: Add complex exploration routes, blocking paths or providing elevated vantage points.
 
-### 5. ⭐ XPSystem & Progression
-* Experience gain from killing infected (+20 XP), gathering resources (+5 XP), and crafting items (+10-20 XP).
-* Stat attribution upon level-up: Kalma attributes (**Strength, Military, Engineering, Intelligence**) randomly receive permanent +1 boosts.
+### 5. 🕒 Dynamic Day/Night Cycle & Panic
+* **Day (17m) / Night (7m)** time-progression engine with real-time solar rotations and color gradients.
+* **Night Buffs**: At nightfall (23:00 to 06:00), zombies automatically receive a **+50% Movement Speed** and **+30% Attack Damage** boost.
 
-### 6. 💀 Sinister Death & Respawn
-* Sinematic dark red death overlay displaying statistics like survived days.
-* **Loot Drop**: All inventory items are dropped as physical loot boxes exactly where the character dies.
-* **Respawn**: Resetting to the initial spawn point with health restored and needs set to 50%.
+### 6. 💀 Sinister Death & Loot Recovery
+* **Loot Drop**: All backpack and pocket items are dropped as a physical loot box where the player dies.
+* **Respawn**: Resetting at the latest placed Shelter Flag (or initial spawn point) with ihtiyaç (needs) set to 50%.
 
 ---
 
@@ -45,11 +46,16 @@
 | Control | Action |
 |---|---|
 | **Left Click (Ground)** | Click-to-move pathfinding (Vector3 physics-based) |
-| **E Key** | Collect nearby world items |
-| **I Key** | Toggle Inventory grid menu |
-| **Tab Key** | Toggle Crafting menu |
-| **Right Click (Inventory)** | Consume food/water/medicine or Equip weapons |
-| **Shift + Left Click** | Drop inventory item to the ground |
+| **E Key** | Collect world items / Toggle nearby doors |
+| **Shift + E** | Repair nearby damaged structures/doors |
+| **X Key** | Deconstruct/Recycle nearby structures |
+| **I Key** | Toggle Inventory grid (Sırt Çantası) |
+| **Tab Key** | Toggle Crafting terminal |
+| **B Key** | Toggle Construction Mode |
+| **1 to 5 Keys** | Consume food/water/medicine or Equip weapons from pocket slots |
+| **Right Click (Inventory)** | Opens context menu to Use, Recycle, or Discard item |
+| **Shift + Left Click (Inv)** | Drop inventory item to the ground |
+| **M Key** | Toggle Fullscreen Tactical Map |
 | **Escape** | Pause game |
 
 ---

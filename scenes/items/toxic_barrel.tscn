@@ -1,0 +1,43 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/toxic_barrel.gd" id="1_toxic_script"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_barrel"]
+albedo_color = Color(0.2, 0.85, 0.1, 1) # Toxic neon green
+roughness = 0.5
+emission_enabled = true
+emission = Color(0.1, 0.55, 0.05, 1)
+emission_energy_multiplier = 0.65
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_barrel"]
+material = SubResource("StandardMaterial3D_barrel")
+radius = 0.35
+height = 1.0
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_barrel_collision"]
+radius = 0.35
+height = 1.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_detection"]
+radius = 3.5
+
+[node name="ToxicBarrel" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_toxic_script")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("CylinderMesh_barrel")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("CylinderShape3D_barrel_collision")
+
+[node name="DetectionArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DetectionArea"]
+shape = SubResource("SphereShape3D_detection")

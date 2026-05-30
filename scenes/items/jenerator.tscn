@@ -1,0 +1,49 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/structure_base.gd" id="1_structure_script"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gen"]
+albedo_color = Color(0.85, 0.7, 0.1, 1) # Neon yellow-gold generator
+roughness = 0.5
+metallic = 0.8
+emission_enabled = true
+emission = Color(0.4, 0.3, 0.05, 1)
+emission_energy_multiplier = 0.3
+
+[sub_resource type="BoxMesh" id="BoxMesh_gen"]
+material = SubResource("StandardMaterial3D_gen")
+size = Vector3(1.2, 0.9, 0.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gen_collision"]
+size = Vector3(1.2, 0.9, 0.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
+size = Vector3(1.8, 1.5, 1.5)
+
+[node name="Jenerator" type="StaticBody3D"]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("1_structure_script")
+structure_name = "Jeneratör"
+max_health = 150.0
+repair_material_id = "metal"
+repair_cost = 2
+repair_heal_amount = 60.0
+build_material_id = "jenerator"
+build_cost = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+mesh = SubResource("BoxMesh_gen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("BoxShape3D_gen_collision")
+
+[node name="InteractionArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+shape = SubResource("BoxShape3D_interaction")

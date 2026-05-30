@@ -1,0 +1,49 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/turret_ai.gd" id="1_turret_script"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_turret"]
+albedo_color = Color(0.7, 0.1, 0.45, 1) # Dark crimson-purple high-tech automatic turret
+roughness = 0.4
+metallic = 0.9
+emission_enabled = true
+emission = Color(0.4, 0.05, 0.25, 1)
+emission_energy_multiplier = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_turret"]
+material = SubResource("StandardMaterial3D_turret")
+size = Vector3(0.9, 1.5, 0.9)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_turret_collision"]
+size = Vector3(0.9, 1.5, 0.9)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
+size = Vector3(1.6, 2.0, 1.6)
+
+[node name="Taret" type="StaticBody3D"]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("1_turret_script")
+structure_name = "Otomatik Taret"
+max_health = 200.0
+repair_material_id = "metal"
+repair_cost = 3
+repair_heal_amount = 50.0
+build_material_id = "taret"
+build_cost = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+mesh = SubResource("BoxMesh_turret")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("BoxShape3D_turret_collision")
+
+[node name="InteractionArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+shape = SubResource("BoxShape3D_interaction")

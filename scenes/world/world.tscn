@@ -12,12 +12,13 @@
 [ext_resource type="Script" path="res://scripts/systems/fog_of_war.gd" id="10_fog_of_war"]
 [ext_resource type="PackedScene" path="res://scenes/systems/zone_controller.tscn" id="11_zone_scene"]
 [ext_resource type="PackedScene" path="res://scenes/items/locked_chest.tscn" id="12_locked_chest"]
+[ext_resource type="PackedScene" path="res://scenes/items/toxic_barrel.tscn" id="13_toxic_barrel"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
-size = Vector2(100, 100)
+size = Vector2(500, 500)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(100, 0.2, 100)
+size = Vector3(500, 0.2, 500)
 
 [sub_resource type="StandardMaterial3D" id="BuildingMaterial"]
 albedo_color = Color(0.2, 0.24, 0.32, 1)
@@ -65,17 +66,26 @@ emission_energy_multiplier = 1.2
 albedo_color = Color(0.08, 0.09, 0.1, 1)
 roughness = 0.4
 
+[sub_resource type="StandardMaterial3D" id="RustyCarMaterial"]
+albedo_color = Color(0.6, 0.3, 0.15, 1)
+roughness = 0.95
+metallic = 0.5
+
+[sub_resource type="StandardMaterial3D" id="BridgeMaterial"]
+albedo_color = Color(0.25, 0.25, 0.28, 1)
+roughness = 0.9
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_dismalle"]
-size = Vector3(50, 6, 40)
+size = Vector3(250, 6, 200)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ticaret"]
-size = Vector3(50, 6, 40)
+size = Vector3(250, 6, 200)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_sanayi"]
-size = Vector3(100, 6, 30)
+size = Vector3(500, 6, 150)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_merkez"]
-size = Vector3(100, 6, 30)
+size = Vector3(500, 6, 150)
 
 [node name="World" type="Node3D"]
 
@@ -107,7 +117,7 @@ shape = SubResource("BoxShape3D_ground")
 [node name="Zones" type="Node3D" parent="."]
 
 [node name="Zone_Outskirts" parent="Zones" instance=ExtResource("11_zone_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 125, 0, 0)
 zone_id = "dismalle"
 zone_name = "Dış Mahalleler"
 
@@ -115,7 +125,7 @@ zone_name = "Dış Mahalleler"
 shape = SubResource("BoxShape3D_dismalle")
 
 [node name="Zone_Commercial" parent="Zones" instance=ExtResource("11_zone_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125, 0, 0)
 zone_id = "ticaret"
 zone_name = "Ticaret Bölgesi"
 
@@ -123,7 +133,7 @@ zone_name = "Ticaret Bölgesi"
 shape = SubResource("BoxShape3D_ticaret")
 
 [node name="Zone_Industrial" parent="Zones" instance=ExtResource("11_zone_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -35)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -175)
 zone_id = "sanayi"
 zone_name = "Sanayi Bölgesi"
 
@@ -131,7 +141,7 @@ zone_name = "Sanayi Bölgesi"
 shape = SubResource("BoxShape3D_sanayi")
 
 [node name="Zone_CityCenter" parent="Zones" instance=ExtResource("11_zone_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 35)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 175)
 zone_id = "merkez"
 zone_name = "Şehir Merkezi"
 
@@ -383,6 +393,36 @@ required_intelligence = 3
 required_military = 2
 loot_items = ["tabanca", "metal", "antibiyotik"]
 loot_quantities = [1, 5, 2]
+
+[node name="Car_Barricade_1" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0, 1, 45, 0.8, -5)
+use_collision = true
+collision_layer = 8
+size = Vector3(2.5, 1.6, 4.5)
+material = SubResource("RustyCarMaterial")
+
+[node name="Car_Barricade_2" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, -45, 0.8, 5)
+use_collision = true
+collision_layer = 8
+size = Vector3(2.5, 1.6, 4.5)
+material = SubResource("RustyCarMaterial")
+
+[node name="Bridge_Collapsed_1" type="CSGBox3D" parent="Structures"]
+transform = Transform3D(0.965926, -0.258819, 0, 0.258819, 0.965926, 0, 0, 0, 1, 10, 0.8, -25)
+use_collision = true
+collision_layer = 8
+size = Vector3(10.0, 0.4, 4.0)
+material = SubResource("BridgeMaterial")
+
+[node name="ToxicBarrel_Ind_1" parent="Structures" instance=ExtResource("13_toxic_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.0, 0.0, -30.0)
+
+[node name="ToxicBarrel_Ind_2" parent="Structures" instance=ExtResource("13_toxic_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.0, 0.0, -35.0)
+
+[node name="ToxicBarrel_Ind_3" parent="Structures" instance=ExtResource("13_toxic_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.0, 0.0, -25.0)
 
 [node name="Player" parent="." instance=ExtResource("1_player_scene")]
 

@@ -29,6 +29,11 @@ var _player: CharacterBody3D = null
 var _day_night: DayNightCycle = null
 var _notif_tween: Tween = null
 var _zone_update_timer: float = 0.0
+var _minimap_container: PanelContainer = null
+var _minimap_camera: Camera3D = null
+var _fullmap_container: PanelContainer = null
+var _fullmap_camera: Camera3D = null
+var is_fullmap_open: bool = false
 
 func _ready() -> void:
 	# Hide notification panel initially
@@ -123,6 +128,9 @@ func _ready() -> void:
 	if _player and _player.inventory:
 		_player.inventory.inventory_changed.connect(update_hotbar_ui)
 		update_hotbar_ui()
+		
+	# Minimap Arayüzünü oluştur
+	_create_minimap_ui()
 
 func _on_health_changed(new_health: float, max_hp: float) -> void:
 	if health_bar:
@@ -190,6 +198,15 @@ func _on_freeze_button_pressed() -> void:
 	show_message(msg, col)
 
 func _process(delta: float) -> void:
+	# Update minimap camera position
+	if is_instance_valid(_minimap_camera) and is_instance_valid(_player):
+		_minimap_camera.global_position = _player.global_position + Vector3(0.0, 40.0, 0.0)
+		_minimap_camera.global_rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+		
+	# Update fullmap camera position
+	if is_fullmap_open and is_instance_valid(_fullmap_camera) and is_instance_valid(_player):
+		_fullmap_camera.global_position = _player.global_position + Vector3(0.0, 100.0, 0.0)
+		
 	# Periodically update safe zones count every 1.5 seconds
 	_zone_update_timer += delta
 	if _zone_update_timer >= 1.5:
@@ -270,6 +287,11 @@ func _input(event: InputEvent) -> void:
 			_on_stance_changed("HAYATTA_KAL")
 		elif event.keycode == KEY_F3:
 			_on_stance_changed("AGRESIF")
+		elif event.keycode == KEY_M:
+			if is_fullmap_open:
+				close_fullmap()
+			elif _player and not _player.is_ui_open:
+				open_fullmap()
 
 func _on_stance_changed(stance: String) -> void:
 	NPCManager.active_order = stance
@@ -314,6 +336,7 @@ func _create_hotbar_ui() -> void:
 	# Ana Hotbar Panel Container
 	var hotbar_panel = PanelContainer.new()
 	hotbar_panel.name = "HotbarPanel"
+	hotbar_panel.mouse_filter = Control.MOUSE_FILTER_PASS
 	
 	# Premium Cyberpunk tarzı yarı şeffaf arka plan
 	var style = StyleBoxFlat.new()
@@ -335,6 +358,7 @@ func _create_hotbar_ui() -> void:
 	
 	# Margin Container
 	var margin = MarginContainer.new()
+	margin.mouse_filter = Control.MOUSE_FILTER_PASS
 	margin.add_theme_constant_override("margin_left", 12)
 	margin.add_theme_constant_override("margin_top", 8)
 	margin.add_theme_constant_override("margin_right", 12)
@@ -343,17 +367,17 @@ func _create_hotbar_ui() -> void:
 	
 	# HBoxContainer for 5 slots
 	var hbox = HBoxContainer.new()
+	hbox.mouse_filter = Control.MOUSE_FILTER_PASS
 	hbox.add_theme_constant_override("separation", 10)
 	margin.add_child(hbox)
 	
 	# Create 5 slots
 	for i in range(5):
-		var slot = PanelContainer.new()
-		slot.set_script(load("res://scripts/ui/drag_drop_hotbar.gd"))
+		var slot = preload("res://scripts/ui/drag_drop_hotbar.gd").new()
 		slot.set("hotbar_index", i)
 		slot.set("hud", self)
-		slot.custom_minimum_size = Vector2(38, 38) # Yarı yarıya küçültüldü
-		slot.mouse_filter = Control.MOUSE_FILTER_PASS
+		slot.custom_minimum_size = Vector2(40, 40) # Mükemmel küçük kareler (40x40)
+		slot.mouse_filter = Control.MOUSE_FILTER_STOP
 		
 		var slot_style = StyleBoxFlat.new()
 		slot_style.bg_color = Color(0.08, 0.09, 0.11, 0.9)
@@ -368,30 +392,32 @@ func _create_hotbar_ui() -> void:
 		slot_style.corner_radius_bottom_right = 4
 		slot.add_theme_stylebox_override("panel", slot_style)
 		
-		# VBox Container inside slot
-		var vbox = VBoxContainer.new()
-		vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-		vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		slot.add_child(vbox)
+		# Control inside slot for absolute layout (prevents stretching)
+		var content = Control.new()
+		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(content)
 		
 		# Kısayol Tuş Etiketi (sol üst)
 		var num_lbl = Label.new()
 		num_lbl.text = str(i + 1)
 		num_lbl.add_theme_font_size_override("font_size", 8)
 		num_lbl.add_theme_color_override("font_color", Color(0.12, 0.6, 0.9, 0.8))
-		num_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		num_lbl.position = Vector2(3, 1)
 		num_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		vbox.add_child(num_lbl)
+		content.add_child(num_lbl)
 		
 		# Eşya adı
 		var item_lbl = Label.new()
 		item_lbl.text = "Boş"
 		item_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		item_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		item_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		item_lbl.add_theme_font_size_override("font_size", 7)
 		item_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+		item_lbl.position = Vector2(2, 10)
+		item_lbl.size = Vector2(36, 20)
 		item_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		vbox.add_child(item_lbl)
+		content.add_child(item_lbl)
 		
 		# Eşya miktarı
 		var qty_lbl = Label.new()
@@ -399,8 +425,10 @@ func _create_hotbar_ui() -> void:
 		qty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		qty_lbl.add_theme_font_size_override("font_size", 7)
 		qty_lbl.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+		qty_lbl.position = Vector2(2, 28)
+		qty_lbl.size = Vector2(36, 10)
 		qty_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		vbox.add_child(qty_lbl)
+		content.add_child(qty_lbl)
 		
 		hbox.add_child(slot)
 		hotbar_slots_ui.append(slot)
@@ -411,27 +439,26 @@ func _create_hotbar_ui() -> void:
 	# Ekranın sol alt köşesinde konumlandır (Görselle tam uyumlu)
 	hotbar_panel.set_anchors_preset(10) # PRESET_BOTTOM_LEFT
 	hotbar_panel.position.x = 20 # Sol kenardan 20 piksel boşluk
-	hotbar_panel.position.y = get_viewport().get_visible_rect().size.y - 85 # Sol alta konumlandır
+	hotbar_panel.position.y = get_viewport().get_visible_rect().size.y - 75 # Sol alta konumlandır
 	
 	# Pencere boyutu değiştiğinde pozisyonu korumak için viewport sinyali bağla
 	get_viewport().size_changed.connect(func():
-		hotbar_panel.position.y = get_viewport().get_visible_rect().size.y - 85
+		hotbar_panel.position.y = get_viewport().get_visible_rect().size.y - 75
 	)
 
 func update_hotbar_ui() -> void:
-	if not _player or not hotbar_slots_ui or hotbar_slots_ui.size() < 5:
-		return
-		
-	var player_hotbar = _player.get("hotbar")
-	if not player_hotbar:
+	if not _player or not _player.inventory or not hotbar_slots_ui or hotbar_slots_ui.size() < 5:
 		return
 		
 	for i in range(5):
-		var item_id = player_hotbar[i]
+		var pocket_slot = _player.inventory.slots[16 + i]
+		var item_id = pocket_slot["item_id"]
+		var quantity = pocket_slot["quantity"]
+		
 		var slot_panel = hotbar_slots_ui[i]
-		var vbox = slot_panel.get_child(0)
-		var item_lbl = vbox.get_child(1) as Label
-		var qty_lbl = vbox.get_child(2) as Label
+		var content = slot_panel.get_child(0)
+		var item_lbl = content.get_child(1) as Label
+		var qty_lbl = content.get_child(2) as Label
 		var slot_style = slot_panel.get_theme_stylebox("panel") as StyleBoxFlat
 		
 		if item_id != "":
@@ -439,14 +466,218 @@ func update_hotbar_ui() -> void:
 			item_lbl.text = item["name"]
 			item_lbl.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
 			
-			# Envanterdeki toplam adedi bul
-			var total_qty = _player.inventory.get_item_quantity(item_id)
-			qty_lbl.text = "x%d" % total_qty
+			qty_lbl.text = "x%d" % quantity
 			
 			# Kısayol aktif/aktif değil rengi
-			slot_style.border_color = Color(0.12, 0.6, 0.9, 0.8) # Parlak mavi
+			slot_style.border_color = Color(0.12, 0.6, 0.9, 0.8) # Parlak neon mavi
 		else:
 			item_lbl.text = "Boş"
 			item_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 			qty_lbl.text = ""
 			slot_style.border_color = Color(0.24, 0.26, 0.32, 1.0)
+
+func _create_minimap_ui() -> void:
+	# Ana Minimap Panel Container
+	_minimap_container = PanelContainer.new()
+	_minimap_container.name = "MinimapContainer"
+	
+	# Premium slate style with neon cyan borders
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.04, 0.05, 0.07, 0.85)
+	style.border_width_left = 3
+	style.border_width_top = 3
+	style.border_width_right = 3
+	style.border_width_bottom = 3
+	style.border_color = Color(0.12, 0.6, 0.9, 0.7) # Glowing neon cyan
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	style.shadow_color = Color(0.0, 0.0, 0.0, 0.45)
+	style.shadow_size = 5
+	_minimap_container.add_theme_stylebox_override("panel", style)
+	
+	# Position at top right
+	add_child(_minimap_container)
+	_minimap_container.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_minimap_container.position.x = get_viewport().get_visible_rect().size.x - 170
+	_minimap_container.position.y = get_viewport().get_visible_rect().size.y - 180
+	
+	# Viewport container
+	var vp_container = SubViewportContainer.new()
+	vp_container.custom_minimum_size = Vector2(150, 150)
+	vp_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	vp_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_minimap_container.add_child(vp_container)
+	
+	# SubViewport
+	var vp = SubViewport.new()
+	vp.size = Vector2(150, 150)
+	vp.msaa_3d = SubViewport.MSAA_2X # Premium AA for clean graphics
+	vp_container.add_child(vp)
+	
+	# Minimap top-down Camera3D
+	_minimap_camera = Camera3D.new()
+	_minimap_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	_minimap_camera.size = 35.0 # View radius
+	_minimap_camera.far = 100.0
+	_minimap_camera.near = 0.1
+	# Position above player
+	if is_instance_valid(_player):
+		_minimap_camera.global_position = _player.global_position + Vector3(0.0, 40.0, 0.0)
+	else:
+		_minimap_camera.global_position = Vector3(0.0, 40.0, 0.0)
+	_minimap_camera.global_rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+	vp.add_child(_minimap_camera)
+	
+	# Add a premium central player pointer (overlaying 2D label or crosshair)
+	var crosshair = Label.new()
+	crosshair.text = "▲" # Upward arrow representing player position/forward
+	crosshair.add_theme_font_size_override("font_size", 14)
+	crosshair.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3)) # Glowing Crimson Red pointer
+	crosshair.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	crosshair.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	crosshair.set_anchors_preset(Control.PRESET_CENTER)
+	crosshair.position = Vector2(67, 65) # Perfect center of the 150x150 panel
+	crosshair.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_minimap_container.add_child(crosshair)
+	
+	# Connect size changed to adjust bottom-right offset dynamically
+	get_viewport().size_changed.connect(func():
+		_minimap_container.position.x = get_viewport().get_visible_rect().size.x - 170
+		_minimap_container.position.y = get_viewport().get_visible_rect().size.y - 180
+	)
+
+func _create_fullmap_ui() -> void:
+	_fullmap_container = PanelContainer.new()
+	_fullmap_container.name = "FullmapContainer"
+	
+	# Premium dark styling with neon gold borders
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.03, 0.04, 0.05, 0.95)
+	style.border_width_left = 3
+	style.border_width_top = 3
+	style.border_width_right = 3
+	style.border_width_bottom = 3
+	style.border_color = Color(0.9, 0.7, 0.2, 0.8) # Gold border
+	style.corner_radius_top_left = 12
+	style.corner_radius_top_right = 12
+	style.corner_radius_bottom_left = 12
+	style.corner_radius_bottom_right = 12
+	style.shadow_color = Color(0, 0, 0, 0.6)
+	style.shadow_size = 15
+	_fullmap_container.add_theme_stylebox_override("panel", style)
+	
+	# Centered on screen, size 550x550
+	_fullmap_container.custom_minimum_size = Vector2(550, 550)
+	_fullmap_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_fullmap_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	add_child(_fullmap_container)
+	
+	# Center it on ready
+	_fullmap_container.set_anchors_preset(Control.PRESET_CENTER)
+	_fullmap_container.position = (get_viewport().get_visible_rect().size - Vector2(550, 550)) / 2.0
+	
+	# VBox inside
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 10)
+	_fullmap_container.add_child(vbox)
+	
+	# Title HBox (Title + Close Button)
+	var title_hbox = HBoxContainer.new()
+	title_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_child(title_hbox)
+	
+	var title = Label.new()
+	title.text = "🗺️ ŞEHİR TAKTİK HARİTASI"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 14)
+	title.add_theme_color_override("font_color", Color(0.9, 0.7, 0.2))
+	title_hbox.add_child(title)
+	
+	# Subview Container
+	var vp_container = SubViewportContainer.new()
+	vp_container.custom_minimum_size = Vector2(480, 460)
+	vp_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	vp_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	vbox.add_child(vp_container)
+	
+	var vp = SubViewport.new()
+	vp.size = Vector2(480, 460)
+	vp.msaa_3d = SubViewport.MSAA_2X
+	vp_container.add_child(vp)
+	
+	_fullmap_camera = Camera3D.new()
+	_fullmap_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	_fullmap_camera.size = 200.0 # Huge view size to see the whole surrounding
+	_fullmap_camera.far = 200.0
+	_fullmap_camera.near = 0.1
+	_fullmap_camera.global_position = _player.global_position + Vector3(0.0, 100.0, 0.0) if is_instance_valid(_player) else Vector3(0, 100, 0)
+	_fullmap_camera.global_rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+	vp.add_child(_fullmap_camera)
+	
+	# Close info footer
+	var footer = Label.new()
+	footer.text = "[M] Kapat veya Haritadan Çık"
+	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	footer.add_theme_font_size_override("font_size", 10)
+	footer.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	vbox.add_child(footer)
+	
+	# Add a premium central player pointer
+	var pointer = Label.new()
+	pointer.text = "▲"
+	pointer.add_theme_font_size_override("font_size", 18)
+	pointer.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
+	pointer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pointer.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	pointer.set_anchors_preset(Control.PRESET_CENTER)
+	pointer.position = Vector2(232, 230) # Center of the 480x460 viewport within the panel
+	pointer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fullmap_container.add_child(pointer)
+	
+	_fullmap_container.hide()
+	
+	# Connect window resize
+	get_viewport().size_changed.connect(func():
+		_fullmap_container.position = (get_viewport().get_visible_rect().size - Vector2(550, 550)) / 2.0
+	)
+
+func open_fullmap() -> void:
+	if not _player:
+		return
+		
+	# Create if not created
+	if not is_instance_valid(_fullmap_container):
+		_create_fullmap_ui()
+		
+	is_fullmap_open = true
+	_player.is_ui_open = true
+	_player.call("_stop_moving")
+	
+	# Center map camera on player
+	if is_instance_valid(_fullmap_camera) and is_instance_valid(_player):
+		_fullmap_camera.global_position = _player.global_position + Vector3(0.0, 100.0, 0.0)
+		
+	_fullmap_container.show()
+	_fullmap_container.scale = Vector2(0.9, 0.9)
+	_fullmap_container.modulate.a = 0.0
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(_fullmap_container, "scale", Vector2.ONE, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_fullmap_container, "modulate:a", 1.0, 0.15)
+	
+	_player.show_notification("🗺️ Taktik Harita Açıldı", Color(0.9, 0.7, 0.2))
+
+func close_fullmap() -> void:
+	if not is_instance_valid(_fullmap_container):
+		return
+		
+	is_fullmap_open = false
+	if _player:
+		_player.is_ui_open = false
+		
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(_fullmap_container, "scale", Vector2(0.9, 0.9), 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(_fullmap_container, "modulate:a", 0.0, 0.12)
+	await tween.finished
+	_fullmap_container.hide()

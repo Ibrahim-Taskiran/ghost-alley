@@ -8,32 +8,32 @@ var districts: Dictionary = {
 		"danger_level": 1,
 		"danger_text": "⭐ Düşük Tehlike",
 		"color": Color(0.3, 0.8, 0.3), # Yeşil
-		"bounds_x": [0.0, 50.0],
-		"bounds_z": [-20.0, 20.0]
+		"bounds_x": [0.0, 250.0],
+		"bounds_z": [-100.0, 100.0]
 	},
 	"ticaret": {
 		"name": "🏪 Ticaret Bölgesi",
 		"danger_level": 2,
 		"danger_text": "⭐⭐ Orta Tehlike",
 		"color": Color(0.9, 0.7, 0.2), # Sarı/Turuncu
-		"bounds_x": [-50.0, 0.0],
-		"bounds_z": [-20.0, 20.0]
+		"bounds_x": [-250.0, 0.0],
+		"bounds_z": [-100.0, 100.0]
 	},
 	"sanayi": {
 		"name": "🏭 Sanayi Bölgesi",
 		"danger_level": 3,
 		"danger_text": "⭐⭐⭐ Yüksek Tehlike",
 		"color": Color(0.9, 0.4, 0.2), # Koyu Turuncu
-		"bounds_x": [-50.0, 50.0],
-		"bounds_z": [-50.0, -20.0]
+		"bounds_x": [-250.0, 250.0],
+		"bounds_z": [-250.0, -100.0]
 	},
 	"merkez": {
 		"name": "🏢 Şehir Merkezi",
 		"danger_level": 4,
 		"danger_text": "💀 Kritik Tehlike (Horde Kaynağı)",
 		"color": Color(0.9, 0.2, 0.2), # Kırmızı
-		"bounds_x": [-50.0, 50.0],
-		"bounds_z": [20.0, 50.0]
+		"bounds_x": [-250.0, 250.0],
+		"bounds_z": [100.0, 250.0]
 	}
 }
 
